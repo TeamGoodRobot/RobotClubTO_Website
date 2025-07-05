@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Application - Robot Club TO</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Robot Club TO Logo" id="club-logo"> <!-- Assuming logo is still desired -->
+        <h1>Robot Club TO - Membership Application</h1>
+    </header>
+
+    <main>
+        <section id="application-form-section">
+            <h2>Membership Application</h2>
+            <p>Thank you for your interest in joining Robot Club TO! Please fill out the form below.</p>
+
+            <form id="membership-form" action="process_application.php" method="POST">
+                <fieldset>
+                    <legend>Personal Information</legend>
+                    <div>
+                        <label for="fullName">Full Name:</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                    <div>
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div>
+                        <label for="pronouns">Chosen Pronouns:</label>
+                        <input type="text" id="pronouns" name="pronouns">
+                    </div>
+                    <div>
+                        <label for="phone">Phone Number (Optional):</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div>
+                        <label for="socialMedia">Social Media Links (Optional, e.g., LinkedIn, GitHub):</label>
+                        <input type="text" id="socialMedia" name="socialMedia" placeholder="Optional, e.g., Website, LinkedIn, GitHub">
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" name="ageConfirm" value="18plus" required>
+                            I confirm I am 18 years of age or older.
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Acknowledgement of Risks & Waiver of Liability</legend>
+                    <div class="legal-text">
+                        <p>Acknowledgement of Risks and Waiver of Liability: By applying for membership, you acknowledge that activities involving robotics can be inherently dangerous and involve risks of injury or damage. You agree to assume all risks associated with your participation in Robot Club TO activities and to waive any claims against Robot Club TO, its organizers, and members for any injuries or damages that may occur. You are responsible for your own safety and agree to follow all safety guidelines. </p>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" name="liabilityWaiver" value="agreed" required>
+                            I have read, understood, and agree to the Acknowledgement of Risks & Waiver of Liability.
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>About You and Your Interests</legend>
+                    <div>
+                        <label for="aboutYourself">Tell us about yourself (e.g., background, experience with robotics):</label>
+                        <textarea id="aboutYourself" name="aboutYourself" rows="5" required></textarea>
+                    </div>
+                    <div>
+                        <label for="projectInterests">What kind of projects are you interested in (e.g., specific robots, technologies, learning goals)?</label>
+                        <textarea id="projectInterests" name="projectInterests" rows="5" required></textarea>
+                    </div>
+                    <div>
+                        <label for="memberReferences">Member Connections & References:</label>
+                        <p style="font-size: 0.9em; margin-bottom: 5px; color: #555;">Please provide the names of at least two Robot Club TO members who can act as references. Alternatively, if you are new to our community, please state your intention to attend our upcoming open houses or robotics events to get to know our members. We look forward to connecting with you!</p>
+                        <textarea id="memberReferences" name="memberReferences" rows="4" required placeholder="List member names or state your intent to connect at events."></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Membership Tier</legend>
+                    <div>
+                        <label for="tierInterest">Interest in higher-tier membership (monthly fee for more access to robots, projects, and events, details to be provided upon application review)?</label>
+                        <select name="tierInterest" id="tierInterest">
+                            <option value="yes">Yes, tell me more!</option>
+                            <option value="no" selected>No, not at this time.</option>
+                            <option value="maybe">Maybe later.</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <button type="submit">Submit Application</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Robot Club TO. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <!-- script.js linked for potential future client-side validation -->
+</body>
+</html>

@@ -1,0 +1,3 @@
+# Deny all direct web access to this directory and its contents
+# This file should be renamed to .htaccess and moved to your '_private_data' directory.
+Require all denied
