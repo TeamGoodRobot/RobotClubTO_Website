@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=robotclub
+      - DB_USER=robotclub
+      - DB_PASSWORD=robotclub123
+    volumes:
+      - .:/var/www/html
+    networks:
+      - robotclub-network
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=robotclub
+      - POSTGRES_USER=robotclub
+      - POSTGRES_PASSWORD=robotclub123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - robotclub-network
+
+volumes:
+  postgres_data:
+
+networks:
+  robotclub-network:
+    driver: bridge

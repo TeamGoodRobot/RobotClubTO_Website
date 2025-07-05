@@ -1,12 +1,26 @@
 <?php
 // process_application.php
-// IMPORTANT: This is a conceptual script. Security and robust error handling are CRITICAL
-// for any production use. Ensure file permissions, input sanitization, and server configurations
-// are correctly and securely implemented.
+// Updated to use PostgreSQL database for application storage
 
 $message = "";
 $error_message = "";
 $applicationData = ""; // Initialize to prevent error if not set later
+
+// Database connection
+function getDbConnection() {
+    $host = $_ENV['DB_HOST'] ?? 'localhost';
+    $dbname = $_ENV['DB_NAME'] ?? 'robotclub';
+    $username = $_ENV['DB_USER'] ?? 'robotclub';
+    $password = $_ENV['DB_PASSWORD'] ?? 'robotclub123';
+    
+    try {
+        $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $username, $password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $pdo;
+    } catch (PDOException $e) {
+        throw new Exception("Database connection failed: " . $e->getMessage());
+    }
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // --- Collect and Sanitize Data (Basic Example) ---
@@ -36,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($error_message)) {
-        // --- Format Data for Storage/Email ---
+        // --- Format Data for Display ---
         $applicationData = "New Membership Application:\n";
         $applicationData .= "Date: " . date("Y-m-d H:i:s") . "\n";
         $applicationData .= "Full Name: " . $fullName . "\n";
@@ -50,38 +64,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $applicationData .= "Interest in Tiered Membership: " . $tierInterest . "\n";
         $applicationData .= "-------------------------------------------------\n\n";
 
-        // --- Conceptual: Store Data in a Local File ---
-        // WARNING: This is a very basic example. For production:
-        // 1. Ensure the directory is NOT web-accessible.
-        // 2. Ensure proper file permissions (e.g., PHP script can write, but file not world-readable/writable).
-        // 3. Implement file locking (flock) to prevent race conditions if multiple people apply at once.
-        // 4. Consider more robust storage like a database.
-        // 5. Add error handling for file operations.
-        $filePath = __DIR__ . '/_private_data/submitted_applications/applications.txt';
-
-        // --- Store Data in a Local File ---
-        $applicationsDir = dirname($filePath);
-        if (!file_exists($applicationsDir)) {
-            // Attempt to create the directory if it doesn't exist.
-            // Warning: mkdir() permissions (0750) might need adjustment based on your server setup.
-            // The web server user needs to be able to create this directory or it must exist and be writable.
-            if (!mkdir($applicationsDir, 0750, true)) { // 0750: owner rwx, group rx, others ---
-                $error_message .= "<br>Critical Error: Failed to create the application storage directory ('" . htmlspecialchars($applicationsDir) . "'). Please check server permissions and ensure the parent directory is writable by the web server.";
-            }
-        } elseif (!is_writable($applicationsDir)) {
-             $error_message .= "<br>Critical Error: The application storage directory ('" . htmlspecialchars($applicationsDir) . "') is not writable by the web server. Please check permissions.";
+        // --- Store Data in PostgreSQL Database ---
+        try {
+            $pdo = getDbConnection();
+            
+            $sql = "INSERT INTO applications (
+                full_name, email, pronouns, about_yourself, project_interests, 
+                member_references, tier_interest, age_confirmed, liability_waiver_agreed
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $fullName,
+                $email,
+                $pronouns,
+                $aboutYourself,
+                $projectInterests,
+                $memberReferences,
+                $tierInterest,
+                ($ageConfirm === '18plus'),
+                ($liabilityWaiver === 'agreed')
+            ]);
+            
+            $message = "Application submitted successfully. We will review it and get back to you.";
+        } catch (Exception $e) {
+            $error_message .= "<br>Error: Could not save application data to database. Please contact us directly. Error: " . htmlspecialchars($e->getMessage());
         }
-
-        // Proceed only if there are no errors so far (including directory errors)
-        if (empty($error_message)) {
-            if (file_put_contents($filePath, $applicationData, FILE_APPEND | LOCK_EX)) {
-                $message = "Application submitted successfully. We will review it and get back to you.";
-            } else {
-                $error_message .= "<br>Error: Could not save application data to file ('" . htmlspecialchars($filePath) . "'). Please contact us directly. This might be due to file permissions or other server issues.";
-                // Log this error for admin review.
-            }
-        }
-        // $message = "Application data prepared (File writing is conceptual and commented out in this template)."; // This line is now removed
 
 
         // --- Conceptual: Send Email Notification ---
@@ -93,10 +101,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // if (mail($to, $subject, $applicationData, $headers)) {
         //    // Email sent successfully
         // } else {
-        //    // Email sending failed - might still save to file, or log error
-        //    $error_message .= "<br>Notice: Could not send email notification, but application may have been saved.";
+        //    // Email sending failed - might still save to database, or log error
+        //    $error_message .= "<br>Notice: Could not send email notification, but application has been saved.";
         // }
-        $message .= "<br>Email notification is conceptual and commented out in this template.";
 
 
         // Clear form fields after successful submission (optional, for display purposes)
